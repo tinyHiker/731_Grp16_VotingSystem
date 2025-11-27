@@ -1,152 +1,129 @@
 import React from 'react';
-import { Navigate } from 'react-router-dom';
 import api from '../api';
 
-class LoginPage extends React.Component {
+class ResultsPage extends React.Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      idNumber: '',
-      password: '',
+      loading: true,
+      election: null,
+      results: [],
       error: '',
     };
 
-    this.handleSubmit = this.handleSubmit.bind(this);
-    this.handleIdChange = this.handleIdChange.bind(this);
-    this.handlePasswordChange = this.handlePasswordChange.bind(this);
+    this.fetchResults = this.fetchResults.bind(this);
   }
 
-  // 🧪 Method you can test: updates idNumber and clears error
-  handleIdChange(e) {
-    this.setState({
-      idNumber: e.target.value,
-      error: '',
-    });
+  componentDidMount() {
+    this.fetchResults();
   }
 
-  // 🧪 Method you can test: updates password and clears error
-  handlePasswordChange(e) {
-    this.setState({
-      password: e.target.value,
-      error: '',
-    });
-  }
-
-  // 🧪 Method you can test: performs login request + calls onLogin
-  async handleSubmit(e) {
-    e.preventDefault();
-    this.setState({ error: '' });
-
-    const { idNumber, password } = this.state;
-    const { onLogin } = this.props;
-
+  // 🧪 Testable method: loads results from the API
+  async fetchResults() {
     try {
-      const res = await api.post('/api/auth/login', { idNumber, password });
-      const { token, voter } = res.data;
-      onLogin(token, voter);
+      this.setState({ loading: true });
+
+      const res = await api.get('/api/results/current');
+
+      // 👇 log fetched results to the console
+      console.log('Results fetched from /api/results/current:', res.data);
+
+      this.setState({
+        election: res.data.election,
+        results: res.data.results,
+        error: '',
+      });
     } catch (err) {
       console.error(err);
-      const msg = err.response?.data?.error || 'Login failed';
+      const msg = err.response?.data?.error || 'Failed to load results';
       this.setState({ error: msg });
+    } finally {
+      this.setState({ loading: false });
     }
   }
 
   render() {
-    const { isAuthenticated } = this.props;
-    const { idNumber, password, error } = this.state;
+    const { loading, election, results, error } = this.state;
 
-    if (isAuthenticated) {
-      return <Navigate to="/ballot" replace />;
+    if (loading) {
+      return <div>Loading results...</div>;
+    }
+
+    if (error && !election) {
+      return <div style={{ color: 'red' }}>{error}</div>;
     }
 
     return (
       <div
         style={{
-          maxWidth: '400px',
-          margin: '2rem auto',
-          padding: '2rem',
+          maxWidth: '600px',
+          margin: '1rem auto',
+          padding: '1.5rem',
           background: 'white',
           borderRadius: '8px',
           boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
         }}
       >
-        <h2 style={{ marginBottom: '1rem' }}>Voter Login</h2>
-        <p
-          style={{
-            fontSize: '0.9rem',
-            marginBottom: '1rem',
-            color: '#555',
-          }}
-        >
-          Use the ID number and password that were sent to you.
-        </p>
+        {election ? (
+          <>
+            <h2 style={{ marginBottom: '0.25rem' }}>Current Results</h2>
+            <p style={{ marginBottom: '1rem', color: '#555' }}>{election.name}</p>
 
-        {error && (
-          <div
-            style={{
-              marginBottom: '1rem',
-              padding: '0.5rem 0.75rem',
-              borderRadius: '4px',
-              background: '#fee2e2',
-              color: '#b91c1c',
-              fontSize: '0.9rem',
-            }}
-          >
-            {error}
-          </div>
+            {error && (
+              <div
+                style={{
+                  marginBottom: '0.75rem',
+                  padding: '0.5rem 0.75rem',
+                  borderRadius: '4px',
+                  background: '#fee2e2',
+                  color: '#b91c1c',
+                  fontSize: '0.9rem',
+                }}
+              >
+                {error}
+              </div>
+            )}
+
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr style={{ background: '#e5e7eb' }}>
+                  <th style={thStyle}>Candidate</th>
+                  <th style={thStyle}>Party</th>
+                  <th style={thStyle}>Votes</th>
+                </tr>
+              </thead>
+              <tbody>
+                {results.map((r) => (
+                  <tr key={r.candidateId}>
+                    <td style={tdStyle}>{r.name}</td>
+                    <td style={tdStyle}>{r.party || '-'}</td>
+                    <td style={{ ...tdStyle, textAlign: 'right' }}>{r.votes}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </>
+        ) : (
+          <div>No open election found.</div>
         )}
-
-        <form onSubmit={this.handleSubmit}>
-          <label style={{ display: 'block', marginBottom: '0.5rem' }}>
-            ID Number
-            <input
-              type="text"
-              value={idNumber}
-              onChange={this.handleIdChange}
-              style={inputStyle}
-              required
-            />
-          </label>
-
-          <label style={{ display: 'block', marginBottom: '0.75rem' }}>
-            Password
-            <input
-              type="password"
-              value={password}
-              onChange={this.handlePasswordChange}
-              style={inputStyle}
-              required
-            />
-          </label>
-
-          <button type="submit" style={buttonStyle}>
-            Login
-          </button>
-        </form>
       </div>
     );
   }
 }
 
-const inputStyle = {
-  width: '100%',
+const thStyle = {
   padding: '0.5rem',
-  marginTop: '0.25rem',
-  marginBottom: '0.5rem',
-  borderRadius: '4px',
-  border: '1px solid #cbd5e1',
-};
-
-const buttonStyle = {
-  width: '100%',
-  padding: '0.5rem',
-  borderRadius: '4px',
-  border: 'none',
-  background: '#2563eb',
-  color: 'white',
+  borderBottom: '1px solid #d1d5db',
+  textAlign: 'left',
+  color: '#111827', // force dark text
   fontWeight: 'bold',
-  cursor: 'pointer',
 };
 
-export default LoginPage;
+const tdStyle = {
+  padding: '0.5rem',
+  borderBottom: '1px solid #e5e7eb',
+  color: '#111827', // force dark text
+};
+
+export default ResultsPage;
