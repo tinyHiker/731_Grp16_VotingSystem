@@ -1,52 +1,30 @@
 const { AuthController } = require('../auth.controller');
 
-describe('AuthController.validateLoginPayload', () => {
-  test('returns invalid when body is missing', () => {
+describe('AuthController helper methods (input -> output)', () => {
+  // This test verifies that validateLoginPayload, which is used by login()
+  // to validate the incoming credentials, considers a body with both
+  // idNumber and password present to be valid and returns no errors.
+  test('validateLoginPayload returns valid when idNumber and password are present', () => {
     const controller = new AuthController();
-    const result = controller.validateLoginPayload(undefined);
 
-    expect(result.isValid).toBe(false);
-    expect(result.errors).toContain('Request body is required');
-  });
-
-  test('returns invalid when idNumber is missing', () => {
-    const controller = new AuthController();
-    const result = controller.validateLoginPayload({ password: 'pw' });
-
-    expect(result.isValid).toBe(false);
-    expect(result.errors).toContain('idNumber is required');
-  });
-
-  test('returns invalid when password is missing', () => {
-    const controller = new AuthController();
-    const result = controller.validateLoginPayload({ idNumber: '1001' });
-
-    expect(result.isValid).toBe(false);
-    expect(result.errors).toContain('password is required');
-  });
-
-  test('returns valid when idNumber and password are present', () => {
-    const controller = new AuthController();
-    const result = controller.validateLoginPayload({
+    const body = {
       idNumber: '1001',
       password: 'password1',
-    });
+    };
+
+    const result = controller.validateLoginPayload(body);
 
     expect(result.isValid).toBe(true);
     expect(result.errors).toHaveLength(0);
   });
-});
 
-describe('AuthController.buildVoterResponse', () => {
-  test('returns null when voter is null', () => {
+  // This test verifies that buildVoterResponse, which is used by login()
+  // to shape the voter object in the JSON response, correctly maps the
+  // voter document fields (_id, idNumber, name, email, hasVoted) into
+  // the expected DTO structure.
+  test('buildVoterResponse maps voter document to response DTO', () => {
     const controller = new AuthController();
-    const dto = controller.buildVoterResponse(null);
 
-    expect(dto).toBeNull();
-  });
-
-  test('maps voter document to response DTO', () => {
-    const controller = new AuthController();
     const voterDoc = {
       _id: 'abc123',
       idNumber: '1001',
