@@ -5,15 +5,10 @@ class AuthController {
   constructor(authService = AuthService, voterModel = Voter) {
     this.authService = authService;
     this.Voter = voterModel;
-
-    // bind methods used as route handlers
     this.login = this.login.bind(this);
   }
 
-  /**
-   * Pure helper to validate the login payload.
-   * Great for unit tests: input body -> { isValid, errors[] }
-   */
+  
   validateLoginPayload(body) {
     const errors = [];
 
@@ -38,10 +33,7 @@ class AuthController {
     };
   }
 
-  /**
-   * Pure helper to shape the voter object for the API response.
-   * Also easy to unit test.
-   */
+ 
   buildVoterResponse(voter) {
     if (!voter) return null;
 
@@ -54,15 +46,13 @@ class AuthController {
     };
   }
 
-  /**
-   * Express route handler: POST /api/auth/login
-   */
+  
   async login(req, res) {
     try {
       const validation = this.validateLoginPayload(req.body);
 
       if (!validation.isValid) {
-        // Mirror original behavior: 400 for missing fields
+        
         return res
           .status(400)
           .json({ error: validation.errors.join(', ') });
@@ -72,13 +62,10 @@ class AuthController {
 
       const voter = await this.authService.validate(idNumber, password);
       if (!voter) {
-        // Mirror original behavior: 401 for invalid credentials
         return res.status(401).json({ error: 'Invalid credentials' });
       }
 
       const token = this.authService.generateToken(voter);
-
-      // Update lastLoginAt & reset failedAttempts
       voter.lastLoginAt = new Date();
       voter.failedAttempts = 0;
       await voter.save();
@@ -96,9 +83,7 @@ class AuthController {
   }
 }
 
-// Default instance used by the app
-const authController = new AuthController();
 
-// Export both the instance (for routes) and the class (for tests)
+const authController = new AuthController();
 module.exports = authController;
 module.exports.AuthController = AuthController;

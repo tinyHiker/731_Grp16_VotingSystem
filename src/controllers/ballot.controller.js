@@ -4,14 +4,11 @@ class BallotController {
   constructor(ballotService = BallotService) {
     this.ballotService = ballotService;
 
-    // Bind methods used as route handlers
+    
     this.getBallot = this.getBallot.bind(this);
   }
 
-  /**
-   * ✅ Pure helper: build success response body.
-   *    Great for unit tests (input -> output).
-   */
+  
   buildBallotResponse(ballot, voter) {
     if (!ballot) return null;
 
@@ -22,22 +19,12 @@ class BallotController {
     };
   }
 
-  /**
-   * ✅ Helper that centralizes the "no open election" response.
-   *    Easy to assert on res.status/json in tests.
-   */
+  
   handleNoOpenElection(res) {
     return res.status(404).json({ error: 'No open election found' });
   }
 
-  /**
-   * Express route handler: GET /api/ballot/current
-   * Behavior matches your original function version:
-   *  - Calls BallotService.getCurrentBallot()
-   *  - 404 if none
-   *  - JSON body with election, candidates, voter on success
-   *  - 500 on unexpected error
-   */
+  
   async getBallot(req, res) {
     try {
       const ballot = await this.ballotService.getCurrentBallot();
@@ -55,9 +42,7 @@ class BallotController {
   }
 }
 
-// Default instance used by routes
-const ballotController = new BallotController();
 
-// Export both instance (for routes) and class (for tests)
+const ballotController = new BallotController();
 module.exports = ballotController;
 module.exports.BallotController = BallotController;

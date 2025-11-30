@@ -3,15 +3,10 @@ const VoteService = require('../services/vote.service');
 class VoteController {
   constructor(voteService = VoteService) {
     this.voteService = voteService;
-
-    // Bind for use as Express route handler
     this.submitVote = this.submitVote.bind(this);
   }
 
-  /**
-   * ✅ Pure helper: validate payload for submitVote.
-   *    Great for unit tests: body -> { isValid, errors[] }.
-   */
+  
   validateVotePayload(body) {
     const errors = [];
 
@@ -40,10 +35,7 @@ class VoteController {
     };
   }
 
-  /**
-   * ✅ Pure helper-ish: determine source IP.
-   *    Easy to test with a fake req object.
-   */
+ 
   getSourceIp(req) {
     return (
       req.headers?.['x-forwarded-for'] ||
@@ -52,10 +44,7 @@ class VoteController {
     );
   }
 
-  /**
-   * ✅ Pure helper: build success response body.
-   *    vote -> { message, voteId }
-   */
+  
   buildSuccessResponse(vote) {
     if (!vote || !vote._id) return null;
 
@@ -65,10 +54,7 @@ class VoteController {
     };
   }
 
-  /**
-   * Express handler: POST /api/vote
-   * Mirrors your original behavior.
-   */
+  
   async submitVote(req, res) {
     try {
       const validation = this.validateVotePayload(req.body);
@@ -99,7 +85,7 @@ class VoteController {
       }
 
       if (err.code === 11000) {
-        // Duplicate key from unique index (voterId + electionId)
+        
         return res.status(400).json({ error: 'Duplicate vote detected' });
       }
 
@@ -110,9 +96,7 @@ class VoteController {
   }
 }
 
-// Default instance for routes
-const voteController = new VoteController();
 
-// Export instance (for app) and class (for tests)
+const voteController = new VoteController();
 module.exports = voteController;
 module.exports.VoteController = VoteController;

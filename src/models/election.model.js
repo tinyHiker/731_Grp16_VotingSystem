@@ -16,7 +16,7 @@ const electionSchema = new Schema(
     },
 
     state: {
-      type: String, // "Draft", "Open", "Closed", "Published"
+      type: String,
       enum: ELECTION_STATES,
       default: 'Draft',
     },
@@ -32,7 +32,7 @@ const electionSchema = new Schema(
     },
 
     tallyRule: {
-      type: String, // e.g. "Plurality"
+      type: String,
       required: true,
       trim: true,
     },
@@ -51,5 +51,70 @@ const electionSchema = new Schema(
   }
 );
 
-module.exports = model('Election', electionSchema);
+const ElectionModel = model('Election', electionSchema);
+
+class Election {
+  constructor({
+    id = null,
+    name = '',
+    description = '',
+    state = 'Draft',
+    startTime = null,
+    endTime = null,
+    tallyRule = '',
+    createdAt = null,
+    publishedAt = null,
+  } = {}) {
+    this.id = id;
+    this.name = name;
+    this.description = description;
+    this.state = state;
+    this.startTime = startTime;
+    this.endTime = endTime;
+    this.tallyRule = tallyRule;
+    this.createdAt = createdAt;
+    this.publishedAt = publishedAt;
+  }
+
+  static fromDocument(doc) {
+    if (!doc) return null;
+
+    return new Election({
+      id: doc._id?.toString(),
+      name: doc.name,
+      description: doc.description,
+      state: doc.state,
+      startTime: doc.startTime,
+      endTime: doc.endTime,
+      tallyRule: doc.tallyRule,
+      createdAt: doc.createdAt,
+      publishedAt: doc.publishedAt || null,
+    });
+  }
+
+  toPlainObject() {
+    return {
+      name: this.name,
+      description: this.description,
+      state: this.state,
+      startTime: this.startTime,
+      endTime: this.endTime,
+      tallyRule: this.tallyRule,
+      createdAt: this.createdAt,
+      publishedAt: this.publishedAt,
+    };
+  }
+
+  async save() {
+    const doc = new ElectionModel(this.toPlainObject());
+    const saved = await doc.save();
+    this.id = saved._id.toString();
+    this.createdAt = saved.createdAt;
+    this.publishedAt = saved.publishedAt || this.publishedAt;
+    return saved;
+  }
+}
+
+module.exports = ElectionModel;
 module.exports.ELECTION_STATES = ELECTION_STATES;
+module.exports.Election = Election;
