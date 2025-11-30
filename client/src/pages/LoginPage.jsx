@@ -17,7 +17,7 @@ class LoginPage extends React.Component {
     this.handlePasswordChange = this.handlePasswordChange.bind(this);
   }
 
-  // 🧪 Method you can test: updates idNumber and clears error
+  
   handleIdChange(e) {
     this.setState({
       idNumber: e.target.value,
@@ -25,7 +25,7 @@ class LoginPage extends React.Component {
     });
   }
 
-  // 🧪 Method you can test: updates password and clears error
+ 
   handlePasswordChange(e) {
     this.setState({
       password: e.target.value,
@@ -33,7 +33,7 @@ class LoginPage extends React.Component {
     });
   }
 
-  // 🧪 Method you can test: performs login request + calls onLogin
+  
   async handleSubmit(e) {
     e.preventDefault();
     this.setState({ error: '' });

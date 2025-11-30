@@ -19,7 +19,7 @@ class BallotPage extends React.Component {
     this.handleCandidateClick = this.handleCandidateClick.bind(this);
   }
 
-  // Keep hasVoted in sync if the voter prop changes
+  
   componentDidUpdate(prevProps) {
     if (prevProps.voter?.hasVoted !== this.props.voter?.hasVoted) {
       this.setState({ hasVoted: this.props.voter?.hasVoted ?? false });
@@ -30,7 +30,7 @@ class BallotPage extends React.Component {
     this.fetchBallot();
   }
 
-  // 🔍 Method you can unit test: loads election + candidates
+  
   async fetchBallot() {
     try {
       this.setState({ loading: true });
@@ -50,7 +50,7 @@ class BallotPage extends React.Component {
     }
   }
 
-  // ✅ Method you can unit test: submits vote, updates hasVoted + localStorage
+ 
   async handleSubmit(e) {
     e.preventDefault();
     const { selectedCandidateId, election, hasVoted } = this.state;
@@ -94,7 +94,7 @@ class BallotPage extends React.Component {
     }
   }
 
-  // 🖱 Method you can test: selecting a candidate (no-op if already voted)
+  
   handleCandidateClick(candidateId) {
     if (this.state.hasVoted) return;
     this.setState({ selectedCandidateId: candidateId });
@@ -150,7 +150,7 @@ class BallotPage extends React.Component {
               </p>
             )}
 
-            {/* 🔴 Show clear message when they can't vote anymore */}
+          
             {hasVoted && (
               <div
                 style={{
